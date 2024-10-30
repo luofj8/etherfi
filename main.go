@@ -6,6 +6,7 @@ import (
 	"etherfi/etherfiparser"
 	"etherfi/scheduler"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rpc"
 	"log"
 )
 
@@ -21,8 +22,14 @@ func main() {
 		log.Fatalf("连接以太坊客户端出错: %v", err)
 	}
 
+	rpcClient, err := rpc.Dial(config.AppConfig.Ethereum.RpcURL)
+	if err != nil {
+		log.Fatalf("连接 RPC 客户端出错: %v", err)
+	}
+
+	// 初始化 EtherFi 解析器，传入 ethClient 和 rpcClient
+	ethParser := etherfiparser.NewEtherFiParser(ethClient, rpcClient, redisCache)
 	// 初始化 EtherFi 解析器
-	ethParser := etherfiparser.NewEtherFiParser(ethClient, redisCache)
 
 	// 创建调度器
 	scheduler := scheduler.NewChainScheduler(redisCache)
